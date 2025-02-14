@@ -12,15 +12,12 @@ Welcome to IntelliDoc, an intermediate-level project designed to demystify Retri
 - AI-powered question answering using OpenAI's GPT models
 - Flexible command-line interface for various operations
 
-Certainly! I'll add a section to the README that covers the prerequisites, including PostgreSQL with pgvector support and the necessary table structures. Here's how you can incorporate this information:
-
-```markdown
 ## Prerequisites
 
 Before you begin with IntelliDoc, ensure you have the following set up:
 
 1. PostgreSQL (version 12 or higher) with pgvector extension installed.
-2. Python 3.7 or higher.
+2. Python 3.10 or higher.
 3. OpenAI API key for generating embeddings.
 
 ### PostgreSQL and pgvector Setup
