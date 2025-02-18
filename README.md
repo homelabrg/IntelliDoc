@@ -1,16 +1,15 @@
-
 # IntelliDoc
 
-**IntelliDoc** is an open-source document processing and search engine that combines full-text, semantic, and hybrid search capabilities with AI-powered question answering. It leverages **PostgreSQL with pgvector** for efficient vector storage and similarity search.
+**IntelliDoc** is an open-source document processing and search engine that enables users to **embed PDF documents, perform full-text and semantic searches, and generate AI-driven responses**. It leverages **PostgreSQL with pgvector** for efficient vector storage and similarity search.
 
 ## Features
 
-- **PDF Text Extraction and Embedding:** Extract text from PDFs and generate embeddings.
-- **Full-Text Search:** Utilize PostgreSQL's full-text search capabilities.
-- **Semantic Search:** Implement vector-based semantic search using `pgvector`.
-- **Hybrid Search:** Combine full-text and semantic search for enhanced results.
-- **AI-Powered Question Answering:** Use OpenAI's GPT models for answering questions based on document content.
-- **Command-Line Interface (CLI):** A flexible CLI for various operations.
+- **PDF Embedding:** Extract text from PDFs and generate vector embeddings.
+- **Full-Text Search:** Perform PostgreSQL-powered full-text search.
+- **Semantic Search:** Retrieve similar documents using `pgvector`.
+- **Hybrid Search:** Combine full-text and semantic search for optimal results.
+- **RAG (Retrieval-Augmented Generation) Search:** Ask questions based on document content using OpenAI’s GPT.
+- **Command-Line Interface (CLI):** A user-friendly CLI to interact with the system.
 
 ---
 
@@ -24,8 +23,6 @@ Ensure you have:
 - **pgvector extension** installed. [Install pgvector](https://github.com/pgvector/pgvector)
 - **Python 3.8+** installed.
 - **Database connection configured** via environment variables.
-
-_**You can alternatively run the PostgreSQL with pgvector via the provided docker-compose file in the repo docker-compose-pgvector.yml**_
 
 ### **2. Database Schema**
 IntelliDoc uses the following table structures:
@@ -61,9 +58,6 @@ Stores embeddings for document pages.
    ```
 
 2. **Create the Database and Tables**
-   You can create the tables manually using SQL commands or run the provided Python script.
-
-   **Method 1: Manual SQL Execution**
    Run the following SQL commands in your PostgreSQL database:
 
    ```sql
@@ -83,13 +77,6 @@ Stores embeddings for document pages.
        tokens integer not null,
        embedding vector(1536)
    );
-   ```
-
-   **Method 2: Using Python**
-   Run the following Python script to create the required tables:
-
-   ```bash
-   python -c "from src.database.connection import create_tables; create_tables()"
    ```
 
 3. **Verify Table Creation**
@@ -131,32 +118,97 @@ Replace `your_openai_api_key`, `user`, `password`, and `localhost:5432/intellido
 
 ---
 
-## **Usage Guide**
-### **Ingest Documents**
-Extract text from a PDF and store it in the database:
+## **CLI Usage Guide**
+To start the IntelliDoc CLI, run the following command:
+
 ```bash
-python cli.py ingest --file path/to/document.pdf
+python cli.py
 ```
 
-### **Perform Searches**
-- **Full-Text Search**
-  ```bash
-  python cli.py search --type fulltext --query "search term"
-  ```
-- **Semantic Search**
-  ```bash
-  python cli.py search --type semantic --query "search term"
-  ```
-- **Hybrid Search**
-  ```bash
-  python cli.py search --type hybrid --query "search term"
-  ```
+### **Main Menu Options:**
+Upon running the CLI, you will see a menu with the following options:
 
-### **Ask Questions**
-Query the AI-powered system:
-```bash
-python cli.py ask --question "What is the main topic of the document?"
+### **1) Embedding PDFs**
+- Select this option to **embed a PDF file** into the database.
+- You will be prompted to **enter the file path** and **provide a name for the file**.
+
+#### **Example:**
 ```
+Enter the file path of the PDF to embed: path/to/document.pdf
+Enter a name for the file: Financial_Report
+```
+
+---
+
+### **2) Search Documents**
+Select this option to **search the database**. A sub-menu will allow you to choose from the following search types:
+
+#### **Hybrid Search**
+- Enter the **search text**.
+- Enter the **document ID**.
+- Enter the **output directory** (or press **Enter** for the default directory).
+
+#### **Example:**
+```
+Enter search text: revenue growth in 2023
+Enter document ID: 5
+Enter output directory: /home/user/output
+```
+
+---
+
+#### **Full-Text Search**
+- Enter the **search text**.
+- Enter the **document ID**.
+- Enter the **output directory** (or press **Enter** for the default directory).
+
+#### **Example:**
+```
+Enter search text: tax benefits
+Enter document ID: 10
+Enter output directory: ./results
+```
+
+---
+
+#### **Semantic Search**
+- Enter the **search text**.
+- Enter the **document ID**.
+- Enter the **output directory** (or press **Enter** for the default directory).
+
+#### **Example:**
+```
+Enter search text: future AI investments
+Enter document ID: 7
+Enter output directory: /output
+```
+
+---
+
+### **3) RAG (Retrieval-Augmented Generation) Search**
+This option performs **AI-powered question-answering** on documents.
+
+- Enter the **search type** (`full_text`, `semantic`, `hybrid`).
+- Enter the **search text**.
+- Enter the **document ID**.
+- Enter the **output directory** (or press **Enter** for the default directory).
+- Enter the **question** for the AI model.
+- Enter the **language model** to use (`gpt-4` by default).
+
+#### **Example:**
+```
+Enter search type: semantic
+Enter search text: major acquisitions
+Enter document ID: 3
+Enter output directory: ./answers
+Enter your question for the AI model: What companies were acquired in 2023?
+Enter the language model to use (default is gpt-4): gpt-4
+```
+
+---
+
+### **4) Exit**
+Select this option to exit the IntelliDoc CLI.
 
 ---
 
@@ -174,6 +226,4 @@ We welcome contributions from the community! To contribute:
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
-
- 
 
