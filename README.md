@@ -1,163 +1,135 @@
-```markdown
 # IntelliDoc
 
-Welcome to IntelliDoc, an intermediate-level project designed to demystify Retrieval-Augmented Generation (RAG) and vector search techniques. This project serves as a hands-on introduction to building a document processing and querying system, combining full-text, semantic, and hybrid search capabilities with AI-powered question answering. By leveraging PostgreSQL with pgvector for efficient vector storage and similarity search, IntelliDoc offers a practical, scalable approach to implementing RAG concepts. Whether you're a developer looking to understand RAG, a data scientist exploring vector databases, or an AI enthusiast eager to build your first intelligent document system, IntelliDoc provides a solid foundation. It's more than just a demo—it's a learning journey that bridges the gap between theoretical knowledge and practical implementation, setting you on the path to creating sophisticated AI-driven document analysis tools.
+IntelliDoc is an intermediate-level project designed to demystify Retrieval-Augmented Generation (RAG) and vector search techniques. It serves as a hands-on introduction to building a document processing and querying system, combining full-text, semantic, and hybrid search capabilities with AI-powered question answering. By leveraging PostgreSQL with pgvector for efficient vector storage and similarity search, IntelliDoc offers a practical, scalable approach to implementing RAG concepts.
 
 ## Features
 
-- PDF text extraction and embedding
-- Full-text search using PostgreSQL
-- Semantic search using vector embeddings
-- Hybrid search combining full-text and semantic search
-- AI-powered question answering using OpenAI's GPT models
-- Flexible command-line interface for various operations
+- **PDF Text Extraction and Embedding:** Extract text from PDFs and generate embeddings for semantic analysis.
+- **Full-Text Search:** Utilize PostgreSQL's full-text search capabilities.
+- **Semantic Search:** Implement vector-based semantic search using pgvector.
+- **Hybrid Search:** Combine full-text and semantic search for enhanced results.
+- **AI-Powered Question Answering:** Leverage OpenAI's GPT models for answering questions based on document content.
+- **Command-Line Interface (CLI):** A flexible CLI for various operations.
 
 ## Prerequisites
 
-Before you begin with IntelliDoc, ensure you have the following set up:
+Before setting up IntelliDoc, ensure you have the following:
 
-1. PostgreSQL (version 12 or higher) with pgvector extension installed.
-2. Python 3.10 or higher.
-3. OpenAI API key for generating embeddings.
-
-### PostgreSQL and pgvector Setup
-
-1. Install PostgreSQL: [PostgreSQL Downloads](https://www.postgresql.org/download/)
-2. Install pgvector:
-   ```
-   CREATE EXTENSION vector;
-   ```
-Note: You might also plan to use docker to run postgressql with pgvector. Check the docker-compose-pgvector.yml for details.
-
-### Database Schema
-
-IntelliDoc requires two main tables in your PostgreSQL database:
-
-1. `documents` table:
-   ```
-   CREATE TABLE documents (
-       id SERIAL PRIMARY KEY,
-       file_name TEXT NOT NULL,
-       upload_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-   );
-   ```
-   This table stores metadata about the uploaded documents.
-   - `id`: Unique identifier for each document.
-   - `file_name`: Name of the uploaded file.
-   - `upload_date`: Timestamp of when the document was uploaded.
-
-2. `embeddings` table:
-   ```
-   CREATE TABLE embeddings (
-       id SERIAL PRIMARY KEY,
-       document_id INTEGER REFERENCES documents(id),
-       page_number INTEGER NOT NULL,
-       content TEXT NOT NULL,
-       embedding vector(1536)
-   );
-   ```
-   This table stores the actual content and embeddings of document chunks.
-   - `id`: Unique identifier for each embedding.
-   - `document_id`: Foreign key referencing the `documents` table.
-   - `page_number`: Page number of the chunk in the original document.
-   - `content`: Text content of the chunk.
-   - `embedding`: Vector representation of the content (1536-dimensional for OpenAI's ada-002 model).
-
-Ensure these tables are created in your database before running IntelliDoc.
-```
+- **Python 3.8 or higher:** [Download Python](https://www.python.org/downloads/)
+- **PostgreSQL 14 or higher:** [Download PostgreSQL](https://www.postgresql.org/download/)
+- **pgvector Extension:** Install the pgvector extension in your PostgreSQL database.
+- **OpenAI API Key:** Sign up at [OpenAI](https://platform.openai.com/signup) to obtain your API key.
 
 ## Installation
 
-1. Clone this repository:
+Follow these steps to set up IntelliDoc:
 
-2. Create a virtual environment:
-   ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-   ```
-   Note: Python 3.10 and above is recommended.
+1. **Clone the Repository:**
 
-3. Install the required packages:
+   ```bash
+   git clone https://github.com/homelabrg/IntelliDoc.git
+   cd IntelliDoc
    ```
+
+2. **Set Up a Virtual Environment:**
+
+   ```bash
+   python3 -m venv env
+   source env/bin/activate   # On Windows, use `env\Scripts\activate`
+   ```
+
+3. **Install Dependencies:**
+
+   ```bash
    pip install -r requirements.txt
    ```
 
-4. Set up your PostgreSQL database and update the connection details in `src/config.py`.
+4. **Configure Environment Variables:**
 
-5. Set your OpenAI API key in `src/config.py` or as an environment variable.
+   Create a `.env` file in the project root with the following content:
+
+   ```env
+   OPENAI_API_KEY=your_openai_api_key
+   DATABASE_URL=postgresql://user:password@localhost:5432/intellidoc
+   ```
+
+   Replace `your_openai_api_key`, `user`, `password`, and `localhost:5432/intellidoc` with your actual OpenAI API key and PostgreSQL credentials.
+
+5. **Set Up PostgreSQL with pgvector:**
+
+   - **Install pgvector Extension:**
+
+     Follow the instructions in the [pgvector GitHub repository](https://github.com/pgvector/pgvector) to install the extension.
+
+   - **Create the Database and Enable pgvector:**
+
+     ```sql
+     CREATE DATABASE intellidoc;
+     \c intellidoc
+     CREATE EXTENSION vector;
+     ```
+
+6. **Run Migrations:**
+
+   Use the migration tool of your choice (e.g., Alembic) to set up the database schema. Ensure all necessary tables and indexes are created.
 
 ## Usage
 
-### Embedding a PDF
+With the setup complete, you can start using IntelliDoc:
 
-```
-python main.py --embed "/path/to/your/pdf/file.pdf" "file_name_to_store.pdf"
-```
+1. **Ingest Documents:**
 
-### Performing a Search
+   Use the CLI to ingest PDF documents into the system:
 
-```
-python main.py --search <search_type> "your search query" <document_id> --output "/path/to/output/directory"
-```
-Replace `<search_type>` with either `full_text`, `semantic`, or `hybrid`.
+   ```bash
+   python cli.py ingest --file path/to/your/document.pdf
+   ```
 
-### Question Answering
+   This command extracts text from the PDF, generates embeddings, and stores them in the PostgreSQL database.
 
-```
-python main.py --qa <search_type> "your search query" <document_id> "your question" --model gpt-4 --output "/path/to/output/directory"
-```
+2. **Perform Searches:**
 
-## Project Structure
+   - **Full-Text Search:**
 
-```
-IntelliDoc/
-├── src/
-│   ├── embedding/
-│   │   ├── pdf_embedder.py
-│   │   └── embeddings.py
-│   ├── search/
-│   │   ├── full_text.py
-│   │   ├── semantic.py
-│   │   └── hybrid.py
-│   ├── qa/
-│   │   └── qa_engine.py
-│   ├── utils/
-│   │   └── file_operations.py
-│   ├── database/
-│   │   ├── connection.py
-│   │   └── models.py
-│   └── config.py
-├── main.py
-├── requirements.txt
-├── docker-compose-pgvector.yml
-├── README.md
-└── LICENSE
-```
+     ```bash
+     python cli.py search --type fulltext --query "your search term"
+     ```
 
-## Configuration
+   - **Semantic Search:**
 
-Update `src/config.py` with your database credentials and OpenAI API key.
+     ```bash
+     python cli.py search --type semantic --query "your search term"
+     ```
+
+   - **Hybrid Search:**
+
+     ```bash
+     python cli.py search --type hybrid --query "your search term"
+     ```
+
+3. **Ask Questions:**
+
+   Utilize the AI-powered question-answering feature:
+
+   ```bash
+   python cli.py ask --question "What is the main topic of the document?"
+   ```
+
+   This command uses OpenAI's GPT model to provide answers based on the ingested documents.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions from the community. To contribute:
 
-## Disclaimer and License
+1. **Fork the Repository:** Click the "Fork" button at the top right of the repository page.
+2. **Create a New Branch:** Use `git checkout -b your-feature-branch` to create a new branch.
+3. **Make Changes:** Implement your feature or fix.
+4. **Commit Changes:** Use `git commit -m "Description of your changes"` to commit.
+5. **Push to Branch:** Use `git push origin your-feature-branch` to push your changes.
+6. **Create a Pull Request:** Navigate to the original repository and click "New Pull Request."
 
-### Educational Purpose
+## License
 
-IntelliDoc is an open-source project developed for educational and demonstration purposes. It is intended to serve as a learning tool for understanding and implementing Retrieval-Augmented Generation (RAG) concepts and vector search techniques. While efforts have been made to ensure the accuracy and functionality of the code, it may not be suitable for production environments without further development and testing.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-### No Warranty
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-### Use at Your Own Risk
-
-The use of IntelliDoc in production environments or for processing sensitive or critical data is not recommended without thorough review, testing, and potential modifications to meet specific security and performance requirements. Users implement and use this software at their own risk.
-
-### License
-
-IntelliDoc is released under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-By using IntelliDoc, you acknowledge that you have read this disclaimer and agree to its terms.
+---
